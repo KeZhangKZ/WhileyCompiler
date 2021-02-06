@@ -20,11 +20,14 @@ import java.util.Collections;
 import java.util.List;
 
 import wyc.io.WhileyFileLexer;
+import wybs.lang.Build;
 import wyfs.lang.Content;
+import wyfs.lang.Content.Type;
 import wyfs.lang.Path;
+import wyfs.lang.Path.ID;
 import wyil.lang.WyilFile;
 
-public class WhileyFile {
+public class WhileyFile implements Build.Entry {
 	// =========================================================================
 	// Source Content Type
 	// =========================================================================
@@ -77,6 +80,16 @@ public class WhileyFile {
 		this.tokens = tokens;
 	}
 
+	@Override
+	public ID getID() {
+		return entry.id();
+	}
+
+	@Override
+	public Type<?> getContentType() {
+		return ContentType;
+	}
+	
 	public Path.Entry<WhileyFile> getEntry() {
 		return entry;
 	}

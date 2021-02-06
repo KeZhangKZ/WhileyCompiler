@@ -37,6 +37,8 @@ import wybs.util.SectionedSchema.Section;
 import wyc.util.ErrorMessages;
 import wyfs.lang.Content;
 import wyfs.lang.Path;
+import wyfs.lang.Content.Type;
+import wyfs.lang.Path.ID;
 import wyfs.util.ArrayUtils;
 import wyfs.util.Trie;
 import wyil.io.WyilFilePrinter;
@@ -86,7 +88,7 @@ import wyil.util.WyilUtils;
  * @author David J. Pearce
  *
  */
-public class WyilFile extends AbstractCompilationUnit<WyilFile> {
+public class WyilFile extends AbstractCompilationUnit<WyilFile> implements Build.Entry {
 
 	// =========================================================================
 	// Binary Content Type
@@ -357,6 +359,16 @@ public class WyilFile extends AbstractCompilationUnit<WyilFile> {
 	// Accessors
 	// =========================================================================
 
+	@Override
+	public ID getID() {
+		return entry.id();
+	}
+
+	@Override
+	public Content.Type<?> getContentType() {
+		return ContentType;
+	}
+	
 	public int getMajorVersion() {
 		return majorVersion;
 	}

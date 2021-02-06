@@ -27,7 +27,7 @@ import wyil.transform.MoveAnalysis;
 import wyil.transform.NameResolution;
 
 
-public class NewCompileTask<E extends Build.Entry<SyntacticHeap>, S extends Build.State<S>> implements Function<S, S> {
+public class NewCompileTask<S extends Build.State<S>> implements Function<S, S> {
 	private final Build.Meter meter = Build.NULL_METER;
 	private final List<Build.Package> packages;
 	private final Path.ID id;
@@ -40,14 +40,14 @@ public class NewCompileTask<E extends Build.Entry<SyntacticHeap>, S extends Buil
 	@Override
 	public S apply(S t) {
 		// Identify all Whiley source files
-		List<Build.Entry<WhileyFile>> sources = (List<Build.Entry<WhileyFile>>) t.selectAll(WhileyFile.ContentType);
+		List<WhileyFile> sources = t.selectAll(WhileyFile.ContentType);
 		// Compile them into a single binary target
 		WyilFile target = compile(sources);
 		// Write target back
-		return t.put(WyilFile.ContentType, id, target);		
+		return t.put(target);		
 	}
 	
-	private WyilFile compile(List<Build.Entry<WhileyFile>> sources) {
+	private WyilFile compile(List<WhileyFile> sources) {
 		WyilFile target = new WyilFile(null);
 		// Construct root entry
 		target.setRootItem(new WyilFile.Decl.Module(new Name(id), new Tuple<>(), new Tuple<>(), new Tuple<>()));
@@ -56,7 +56,7 @@ public class NewCompileTask<E extends Build.Entry<SyntacticHeap>, S extends Buil
 		// Parse all source files
 		for (int i = 0; i != sources.size(); ++i) {
 			// Read ith source file
-			WhileyFile source = sources.get(i).getContent();
+			WhileyFile source = sources.get(i);
 			// Construct parser
 			WhileyFileParser wyp = new WhileyFileParser(target, source);
 			// Parse it
