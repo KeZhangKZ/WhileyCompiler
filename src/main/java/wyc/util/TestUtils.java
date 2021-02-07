@@ -35,10 +35,12 @@ import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
 import wybs.util.Logger;
 import wybs.util.SequentialBuildProject;
+import wybs.util.SimpleBuildSystem;
 import wyc.io.WhileyFileLexer;
 import wyc.io.WhileyFileParser;
 import wyc.lang.WhileyFile;
 import wyc.task.CompileTask;
+import wyc.task.NewCompileTask;
 import wycli.WyMain;
 import wycli.lang.Command;
 import wyfs.lang.Content;
@@ -273,6 +275,48 @@ public class TestUtils {
 		return new Pair<>(result, output);
 	}
 
+	public static Pair<Boolean, String> compile2(File whileydir, boolean verify, boolean counterexamples, String arg)
+			throws IOException {
+		ByteArrayOutputStream syserr = new ByteArrayOutputStream();
+		PrintStream psyserr = new PrintStream(syserr);
+		//
+		boolean result = true;
+		//
+		try {
+			// Construct the project
+			DirectoryRoot root = new DirectoryRoot(whileydir, registry);
+			// Read the source file
+			Path.ID id = Trie.fromString(arg);
+			Path.Entry<WhileyFile> source = root.get(id, WhileyFile.ContentType);
+			if (source == null) {
+				throw new IllegalArgumentException("file not found: " + arg);
+			}
+			// Construct the project
+			SimpleBuildSystem bsys = new SimpleBuildSystem();
+			// Apply Whiley Compile Task
+			bsys.apply(new NewCompileTask<>(id, Collections.EMPTY_LIST));
+			// Extract files
+			WyilFile target = bsys.get().get(WyilFile.ContentType, id);
+			//
+			// FIXME: this seems quite broken.
+			wycli.commands.Build.printSyntacticMarkers(psyserr, (List) sources, (Path.Entry) target);
+		} catch (SyntacticException e) {
+			// Print out the syntax error
+			//e.outputSourceError(psyserr);
+			result = false;
+		}catch (Exception e) {
+			// Print out the syntax error
+			printStackTrace(psyserr, e);
+			result = false;
+		}
+		//
+		psyserr.flush();
+		// Convert bytes produced into resulting string.
+		byte[] errBytes = syserr.toByteArray();
+		String output = new String(errBytes);
+		return new Pair<>(result, output);
+	}
+	
 	/**
 	 * Print a complete stack trace. This differs from Throwable.printStackTrace()
 	 * in that it always prints all of the trace.
