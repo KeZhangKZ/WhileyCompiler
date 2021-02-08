@@ -33,9 +33,10 @@ import wybs.lang.SyntacticItem;
 import wybs.util.AbstractCompilationUnit.Identifier;
 import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
+import wybs.util.FileBuildSystem;
 import wybs.util.Logger;
 import wybs.util.SequentialBuildProject;
-import wybs.util.SimpleBuildSystem;
+import wybs.util.AbstractBuildRepository;
 import wyc.io.WhileyFileLexer;
 import wyc.io.WhileyFileParser;
 import wyc.lang.WhileyFile;
@@ -127,14 +128,10 @@ public class TestUtils {
 		@Override
 		public void associate(Path.Entry e) {
 			String suffix = e.suffix();
-
-			if (suffix.equals("whiley")) {
-				e.associate(WhileyFile.ContentType, null);
-			} else if (suffix.equals("wyil")) {
-				e.associate(WyilFile.ContentType, null);
-			} else if (suffix.equals("wyal")) {
-				e.associate(WyalFile.ContentType, null);
-			}
+			Content.Type<?> type = contentType(suffix);
+			if(type != null) {
+				e.associate(type, null);
+			}			
 		}
 
 		@Override
@@ -144,7 +141,14 @@ public class TestUtils {
 
 		@Override
 		public wyfs.lang.Content.Type<?> contentType(String suffix) {
-			// TODO Auto-generated method stub
+			switch(suffix) {
+			case "whiley":
+				return WhileyFile.ContentType;
+			case "wyil":
+				return WyilFile.ContentType;
+			case "wyal":
+				return WyalFile.ContentType;
+			}
 			return null;
 		}
 	}
@@ -277,29 +281,27 @@ public class TestUtils {
 
 	public static Pair<Boolean, String> compile2(File whileydir, boolean verify, boolean counterexamples, String arg)
 			throws IOException {
+		String filename = arg + ".whiley";
 		ByteArrayOutputStream syserr = new ByteArrayOutputStream();
 		PrintStream psyserr = new PrintStream(syserr);
+		// Determine the ID of the test being compiler
+		Path.ID id = Trie.fromString(arg);
 		//
 		boolean result = true;
 		//
 		try {
-			// Construct the project
-			DirectoryRoot root = new DirectoryRoot(whileydir, registry);
-			// Read the source file
-			Path.ID id = Trie.fromString(arg);
-			Path.Entry<WhileyFile> source = root.get(id, WhileyFile.ContentType);
-			if (source == null) {
-				throw new IllegalArgumentException("file not found: " + arg);
-			}
-			// Construct the project
-			SimpleBuildSystem bsys = new SimpleBuildSystem();
+			// Construct the build repository
+			FileBuildSystem fbr = new FileBuildSystem(registry, whileydir, f -> f.getName().endsWith(filename));
 			// Apply Whiley Compile Task
-			bsys.apply(new NewCompileTask<>(id, Collections.EMPTY_LIST));
+			fbr.apply(new NewCompileTask<>(id, Collections.EMPTY_LIST));
 			// Extract files
-			WyilFile target = bsys.get().get(WyilFile.ContentType, id);
-			//
+			WyilFile target = fbr.get().get(WyilFile.ContentType, id);
+			// Check whether result valid (or not)
+			result = target.isValid();
+			// Writeback any results
+			fbr.flush();
 			// FIXME: this seems quite broken.
-			wycli.commands.Build.printSyntacticMarkers(psyserr, (List) sources, (Path.Entry) target);
+			//wycli.commands.Build.printSyntacticMarkers(psyserr, (List) sources, (Path.Entry) target);
 		} catch (SyntacticException e) {
 			// Print out the syntax error
 			//e.outputSourceError(psyserr);

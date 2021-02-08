@@ -76,7 +76,7 @@ public class NewAllValidTest {
 	protected void runTest(String testName) throws IOException {
 		File whileySrcDir = new File(WHILEY_SRC_DIR);
 		//
-		Pair<Boolean,String> p = TestUtils.compile(
+		Pair<Boolean,String> p = TestUtils.compile2(
 				whileySrcDir,      // location of source directory
 				false,             // no verification
 				false,             // no counterexample generation

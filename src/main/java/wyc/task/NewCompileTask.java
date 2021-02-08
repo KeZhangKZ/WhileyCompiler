@@ -1,6 +1,8 @@
 package wyc.task;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +15,9 @@ import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
 import wyc.io.WhileyFileParser;
 import wyc.lang.WhileyFile;
+import wyfs.lang.Content.Type;
 import wyfs.lang.Path;
+import wyfs.lang.Path.ID;
 import wyil.check.DefiniteAssignmentCheck;
 import wyil.check.DefiniteUnassignmentCheck;
 import wyil.check.FlowTypeCheck;
@@ -41,6 +45,9 @@ public class NewCompileTask<S extends Build.State<S>> implements Function<S, S> 
 	public S apply(S t) {
 		// Identify all Whiley source files
 		List<WhileyFile> sources = t.selectAll(WhileyFile.ContentType);
+		//
+		System.out.println("SOURCES: " + sources.size());
+		//		
 		// Compile them into a single binary target
 		WyilFile target = compile(sources);
 		// Write target back
@@ -48,7 +55,7 @@ public class NewCompileTask<S extends Build.State<S>> implements Function<S, S> 
 	}
 	
 	private WyilFile compile(List<WhileyFile> sources) {
-		WyilFile target = new WyilFile(null);
+		WyilFile target = new WyilFile(id);
 		// Construct root entry
 		target.setRootItem(new WyilFile.Decl.Module(new Name(id), new Tuple<>(), new Tuple<>(), new Tuple<>()));
 		// Identify success or failure
@@ -100,6 +107,8 @@ public class NewCompileTask<S extends Build.State<S>> implements Function<S, S> 
 				transforms[i].apply(target);
 			}
 		}
+		//
+		System.out.println("RESULT: " + r);
 		// Collect garbage
 		//target.gc();
 		//

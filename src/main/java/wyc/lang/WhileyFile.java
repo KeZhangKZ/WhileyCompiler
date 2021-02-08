@@ -64,25 +64,39 @@ public class WhileyFile implements Build.Entry {
 		public String getSuffix() {
 			return "whiley";
 		}
+
+		@Override
+		public WhileyFile read(ID id, InputStream input) throws IOException {
+			return new WhileyFile(id, input.readAllBytes());
+		}
 	};
 
 	private final Path.Entry<WhileyFile> entry;
+	private final Path.ID ID;
 
 	private final List<WhileyFileLexer.Token> tokens;
 
 	public WhileyFile(Path.Entry<WhileyFile> entry) throws IOException {
 		this.entry = entry;
 		this.tokens = new WhileyFileLexer(entry).scan();
+		this.ID = entry.id();
 	}
 
+	public WhileyFile(Path.ID ID, byte[] bytes) {
+		this.entry = null;
+		this.tokens = new WhileyFileLexer(new String(bytes)).scan();
+		this.ID = ID;
+	}
+	
 	public WhileyFile(List<WhileyFileLexer.Token> tokens) {
 		this.entry = null;
 		this.tokens = tokens;
+		this.ID = null;
 	}
 
 	@Override
 	public ID getID() {
-		return entry.id();
+		return ID;
 	}
 
 	@Override
