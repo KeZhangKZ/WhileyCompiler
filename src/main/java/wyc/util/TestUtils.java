@@ -22,31 +22,24 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 
 import wyal.lang.WyalFile;
 import wybs.lang.Build;
-import wybs.lang.Build.Meter;
 import wybs.lang.SyntacticException;
 import wybs.lang.SyntacticItem;
 import wybs.util.AbstractCompilationUnit.Identifier;
 import wybs.util.AbstractCompilationUnit.Name;
 import wybs.util.AbstractCompilationUnit.Tuple;
-import wybs.util.FileBuildSystem;
+import wybs.util.FileRepository;
 import wybs.util.Logger;
 import wybs.util.SequentialBuildProject;
-import wybs.util.AbstractBuildRepository;
-import wyc.io.WhileyFileLexer;
 import wyc.io.WhileyFileParser;
 import wyc.lang.WhileyFile;
 import wyc.task.CompileTask;
 import wyc.task.NewCompileTask;
-import wycli.WyMain;
-import wycli.lang.Command;
 import wyfs.lang.Content;
 import wyfs.lang.Path;
-import wyfs.lang.Path.Root;
 import wyfs.util.*;
 import wyil.interpreter.ConcreteSemantics.RValue;
 import wyil.interpreter.Interpreter;
@@ -160,9 +153,9 @@ public class TestUtils {
 	 * @return
 	 */
 	public static Type fromString(String from) {
-		List<WhileyFileLexer.Token> tokens = new WhileyFileLexer(from).scan();
 		WyilFile wf = new WyilFile((Path.Entry<WyilFile>)null);
-		WhileyFileParser parser = new WhileyFileParser(wf, new WhileyFile(tokens));
+		WhileyFile sf = new WhileyFile(null,from.getBytes());
+		WhileyFileParser parser = new WhileyFileParser(wf, sf);
 		WhileyFileParser.EnclosingScope scope = parser.new EnclosingScope(Build.NULL_METER);
 		return parser.parseType(scope);
 	}
@@ -195,14 +188,14 @@ public class TestUtils {
 			}
 			// Get rid of ".whiley" extension
 			String testName = name.substring(0, name.length() - suffix.length());
-			testcases.add(new Object[] { testName });
+			testcases.add(new Object[]{testName});
 		}
 		// Sort the result by filename
 		Collections.sort(testcases, new Comparator<Object[]>() {
-				@Override
-				public int compare(Object[] o1, Object[] o2) {
-					return ((String) o1[0]).compareTo((String) o2[0]);
-				}
+			@Override
+			public int compare(Object[] o1, Object[] o2) {
+				return ((String) o1[0]).compareTo((String) o2[0]);
+			}
 		});
 		return testcases;
 	}
@@ -291,17 +284,18 @@ public class TestUtils {
 		//
 		try {
 			// Construct the build repository
-			FileBuildSystem fbr = new FileBuildSystem(registry, whileydir, f -> f.getName().endsWith(filename));
+			FileRepository db = new FileRepository(registry, whileydir, f -> f.getName().endsWith(filename));
 			// Apply Whiley Compile Task
-			fbr.apply(new NewCompileTask<>(id, Collections.EMPTY_LIST));
+			db.apply(new NewCompileTask<>(id, Collections.EMPTY_LIST));
 			// Extract files
-			WyilFile target = fbr.get().get(WyilFile.ContentType, id);
+			WhileyFile source = db.get().get(WhileyFile.ContentType, id);
+			WyilFile target = db.get().get(WyilFile.ContentType, id);
 			// Check whether result valid (or not)
 			result = target.isValid();
 			// Writeback any results
-			fbr.flush();
-			// FIXME: this seems quite broken.
-			//wycli.commands.Build.printSyntacticMarkers(psyserr, (List) sources, (Path.Entry) target);
+			db.flush();
+			// Print out syntactic markers
+			wycli.commands.Build.printSyntacticMarkers(psyserr, target, source);
 		} catch (SyntacticException e) {
 			// Print out the syntax error
 			//e.outputSourceError(psyserr);

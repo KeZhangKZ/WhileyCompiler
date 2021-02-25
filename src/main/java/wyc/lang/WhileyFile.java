@@ -20,14 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 import wyc.io.WhileyFileLexer;
-import wybs.lang.Build;
+import wybs.lang.SourceFile;
 import wyfs.lang.Content;
 import wyfs.lang.Content.Type;
 import wyfs.lang.Path;
 import wyfs.lang.Path.ID;
-import wyil.lang.WyilFile;
 
-public class WhileyFile implements Build.Entry {
+public class WhileyFile extends SourceFile {
 	// =========================================================================
 	// Source Content Type
 	// =========================================================================
@@ -50,9 +49,8 @@ public class WhileyFile implements Build.Entry {
 		}
 
 		@Override
-		public void write(OutputStream output, WhileyFile value) {
-			// for now
-			throw new UnsupportedOperationException();
+		public void write(OutputStream output, WhileyFile value) throws IOException {
+			output.write(value.getBytes());
 		}
 
 		@Override
@@ -77,21 +75,21 @@ public class WhileyFile implements Build.Entry {
 	private final List<WhileyFileLexer.Token> tokens;
 
 	public WhileyFile(Path.Entry<WhileyFile> entry) throws IOException {
+		super(entry.id(), null);
 		this.entry = entry;
 		this.tokens = new WhileyFileLexer(entry).scan();
 		this.ID = entry.id();
 	}
 
 	public WhileyFile(Path.ID ID, byte[] bytes) {
-		this.entry = null;
-		this.tokens = new WhileyFileLexer(new String(bytes)).scan();
-		this.ID = ID;
+		this(ID,new String(bytes));
 	}
-	
-	public WhileyFile(List<WhileyFileLexer.Token> tokens) {
+
+	public WhileyFile(Path.ID ID, String content) {
+		super(ID, content);
 		this.entry = null;
-		this.tokens = tokens;
-		this.ID = null;
+		this.tokens = new WhileyFileLexer(content).scan();
+		this.ID = ID;
 	}
 
 	@Override

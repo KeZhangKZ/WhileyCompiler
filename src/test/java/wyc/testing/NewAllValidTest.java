@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,6 +107,7 @@ public class NewAllValidTest {
 	// Here we enumerate all available test cases.
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
+//		return Arrays.asList(new Object[][] { {"test"} });
 		return TestUtils.findTestNames(WHILEY_SRC_DIR);
 	}
 

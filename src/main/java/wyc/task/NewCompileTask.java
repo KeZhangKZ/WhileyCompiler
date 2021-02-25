@@ -107,8 +107,6 @@ public class NewCompileTask<S extends Build.State<S>> implements Function<S, S> 
 				transforms[i].apply(target);
 			}
 		}
-		//
-		System.out.println("RESULT: " + r);
 		// Collect garbage
 		//target.gc();
 		//
