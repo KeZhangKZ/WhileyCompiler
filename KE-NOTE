@@ -1,5 +1,8 @@
 VM options:
-    -Dtruffle.class.path.append=target/classes:kelib/wycc-0.8.1.jar:kelib/wytp-0.7.0.jar:kelib/wycli-0.8.1.jar
+    linux:
+        -Dtruffle.class.path.append=target/classes:kelib/wycc-0.8.1.jar:kelib/wytp-0.7.0.jar:kelib/wycli-0.8.1.jar
+    windows:
+        -Dtruffle.class.path.append=target/classes;kelib/wycc-0.8.1.jar;kelib/wytp-0.7.0.jar;kelib/wycli-0.8.1.jar
 args:
     tests/truffleTest/swap_return_two_int.whiley
 
