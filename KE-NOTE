@@ -1,0 +1,6 @@
+VM options:
+    -Dtruffle.class.path.append=target/classes:target/wycc-0.8.1.jar:target/wytp-0.7.0.jar:target/wycli-0.8.1.jar
+args:
+    tests/truffleTest/swap_return_two_int.whiley
+
+Choose correct compiler
