@@ -7,3 +7,6 @@ args:
     tests/truffleTest/swap_return_two_int.whiley
 
 Choose correct compiler
+
+Whiley.Benchmark suit
+    https://github.com/Whiley/WyBench.git
