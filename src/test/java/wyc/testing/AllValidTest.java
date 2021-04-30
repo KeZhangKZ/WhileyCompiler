@@ -31,6 +31,7 @@ import org.junit.runners.Parameterized.Parameters;
 import wyc.util.TestUtils;
 import wyfs.util.Pair;
 import wyfs.util.Trie;
+import wyil.truffleWhiley.TruffleWhiley;
 
 /**
  * Run through all valid test cases with verification enabled. Since every test
@@ -119,5 +120,10 @@ public class AllValidTest {
 	@Test
 	public void valid() throws IOException {
 		runTest(this.testName);
+	}
+
+	@Test
+	public void validTruffle() throws IOException {
+		TruffleWhiley.main(new String[]{"tests/valid/" + this.testName + ".whiley", "true"});
 	}
 }

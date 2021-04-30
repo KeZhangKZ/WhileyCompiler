@@ -19,7 +19,7 @@ public class TruffleWhiley {
         try {
             Context.Builder b = Context.newBuilder(WYIL);
             context = b.in(in).out(out).options(options).build();
-            System.out.println(context.getEngine().getLanguages());
+//            System.out.println(context.getEngine().getLanguages());
         } catch (IllegalArgumentException e) {
             err.println(e.getMessage());
             return 1;
@@ -42,9 +42,16 @@ public class TruffleWhiley {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println("start from main");
-        Source.Builder b = Source.newBuilder(WYIL, new File(args[0]));
-        Source source = b.build();
-        System.exit(executeSource(source, System.in, System.out, new HashMap<>()));
+        if (args.length > 1) {
+            //System.out.println("start from main");
+            Source.Builder b = Source.newBuilder(WYIL, new File(args[0]));
+            Source source = b.build();
+            executeSource(source, System.in, System.out, new HashMap<>());
+        } else {
+            //System.out.println("start from main");
+            Source.Builder b = Source.newBuilder(WYIL, new File(args[0]));
+            Source source = b.build();
+            System.exit(executeSource(source, System.in, System.out, new HashMap<>()));
+        }
     }
 }
