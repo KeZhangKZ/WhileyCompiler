@@ -20,7 +20,7 @@ public final class TruffleWhileyLanguage extends TruffleLanguage<TruffleWhileyCo
     public static final String MIME_TYPE = "application/x-whiley";
 
     public TruffleWhileyLanguage() {
-        System.out.println("Hello whiley!!");
+        //System.out.println("Hello whiley!!");
     }
 
     @Override
@@ -36,7 +36,7 @@ public final class TruffleWhileyLanguage extends TruffleLanguage<TruffleWhileyCo
 
         // create wyil file
         parseTesk(whileySrcDir, pureFileName);
-        System.out.println("parse!");
+        //System.out.println("parse!");
 
         // 
         TruffleWhileyRootNode rootNode = new TruffleWhileyRootNode(this, whileySrcDir, Trie.fromString(pureFileName));
