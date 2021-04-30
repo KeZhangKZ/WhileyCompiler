@@ -37,6 +37,8 @@ import wyc.util.ErrorMessages;
 import wyfs.lang.Path;
 import wyfs.util.ArrayUtils;
 import wyil.interpreter.ConcreteSemantics.RValue;
+import wyil.lang.CompleteTruffleWhileyNode;
+import wyil.lang.TruffleWhileyNode.*;
 import wyil.lang.WyilFile;
 import wyil.lang.WyilFile.Decl;
 import wyil.lang.WyilFile.Expr;
@@ -81,6 +83,64 @@ public class Interpreter {
 
 	private enum Status {
 		RETURN, BREAK, CONTINUE, NEXT
+	}
+
+	public RValue execute(CompleteTruffleWhileyNode.DeclNode.MethodNode root, CallStack frame, Boolean originalInterpreter, RValue... args) {
+		Decl.Method lambda = root.getActualNode();
+		frame = frame.enter(lambda);
+
+		if (originalInterpreter) {
+			// Execute based on the original node
+			return execute(lambda, frame, args, null);
+		} else {
+			// TODO: Execute based on the TruffleNode, just cover Decl.FunctionOrMethod case, probabily need more
+			extractParameters(frame, args, lambda);
+			// Check the precondition
+			Decl.Method fm = lambda;
+			// Check preconditions hold
+			checkPrecondition(WyilFile.RUNTIME_PRECONDITION_FAILURE, frame, fm.getRequires(), null);
+			// check function or method body exists
+			if (fm.getBody().size() == 0) {
+				// FIXME: Add support for native functions or methods. That is,
+				// allow native functions to be implemented and called from the
+				// interpreter.
+				throw new IllegalArgumentException(
+						"no function or method body found: " + lambda.getQualifiedName() + " : " + lambda.getType());
+			}
+			// Execute the method or function body
+			executeBlock(fm.getBody(), frame, new FunctionOrMethodScope(fm, args));
+			// Extra the return values
+			return packReturns(frame, lambda);
+		}
+	}
+
+	public RValue execute(DeclNode.MethodNode root, CallStack frame, Boolean originalInterpreter, RValue... args) {
+		Decl.Method lambda = root.getActualNode();
+		frame = frame.enter(lambda);
+
+		if (originalInterpreter) {
+			// Execute based on the original node
+			return execute(lambda, frame, args, null);
+		} else {
+			// TODO: Execute based on the TruffleNode, just cover Decl.FunctionOrMethod case, probabily need more
+			extractParameters(frame, args, lambda);
+			// Check the precondition
+			Decl.Method fm = lambda;
+			// Check preconditions hold
+			checkPrecondition(WyilFile.RUNTIME_PRECONDITION_FAILURE, frame, fm.getRequires(), null);
+			// check function or method body exists
+			if (fm.getBody().size() == 0) {
+				// FIXME: Add support for native functions or methods. That is,
+				// allow native functions to be implemented and called from the
+				// interpreter.
+				throw new IllegalArgumentException(
+						"no function or method body found: " + lambda.getQualifiedName() + " : " + lambda.getType());
+			}
+			// Execute the method or function body
+			executeBlock(fm.getBody(), frame, new FunctionOrMethodScope(fm, args));
+			// Extra the return values
+			return packReturns(frame, lambda);
+		}
 	}
 
 	/**
