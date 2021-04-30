@@ -22,12 +22,18 @@ public class TruffleWhileyRootNode extends RootNode {
     private WyilFile.Type.Method sig;
     private Interpreter.CallStack stack;
 
-//    @Child
+    @Child
     private Decl.Callable lambda;
+
+//    @Child
+//    private TruffleWhileyNode.DeclNode.MethodNode root;
+
+//    @Child
+//    private CompleteTruffleWhileyNode.DeclNode.MethodNode root;
 
     public TruffleWhileyRootNode(TruffleLanguage<?> language) {
         super(language);
-        System.out.println("create root");
+//        System.out.println("create root");
     }
 
 //    @Override
@@ -39,16 +45,17 @@ public class TruffleWhileyRootNode extends RootNode {
 
     public TruffleWhileyRootNode(TruffleLanguage<?> language, File wyildir, Path.ID id) throws IOException {
         super(language);
-        System.out.println("start creating root");
+//        System.out.println("start creating root");
         execWyil(wyildir, id);
-        System.out.println("finish creating root");
+//        System.out.println("finish creating root");
     }
 
     public void execWyil(File wyildir, Path.ID id) throws IOException {
         Path.Root root = new DirectoryRoot(wyildir, new TestUtils.Registry());
         // Empty signature
-        this.sig = new WyilFile.Type.Method(WyilFile.Type.Void,
-                WyilFile.Type.Tuple.create(new WyilFile.Type.Int[]{WyilFile.Type.Int, WyilFile.Type.Int}));
+        this.sig = new WyilFile.Type.Method(WyilFile.Type.Void, WyilFile.Type.Void);
+//                WyilFile.Type.Int);
+//                WyilFile.Type.Tuple.create(new WyilFile.Type.Int[]{WyilFile.Type.Int, WyilFile.Type.Int}));
         this.name = new WyilFile.QualifiedName(new AbstractCompilationUnit.Name(id), new AbstractCompilationUnit.Identifier("test"));
         // Try to run the given function or method
         this.interpreter = new Interpreter(System.out);
@@ -60,6 +67,14 @@ public class TruffleWhileyRootNode extends RootNode {
             stack.load(root.get(id, WyilFile.ContentType).read());
             // Sanity check modifiers on test method
             this.lambda = stack.getCallable(name, sig);
+
+            if (lambda == null) {
+                throw new IllegalArgumentException("no function or method found: " + name + ", " + sig);
+            }
+//            else if (lambda.getParameters().size() != args.length) {
+//                throw new IllegalArgumentException(
+//                "incorrect number of arguments: " + lambda.getName() + ", " + lambda.getType());
+//            }
             // Sanity check target has correct modifiers.
             if (lambda.getModifiers().match(WyilFile.Modifier.Export.class) == null
                     || lambda.getModifiers().match(WyilFile.Modifier.Public.class) == null) {
@@ -68,6 +83,8 @@ public class TruffleWhileyRootNode extends RootNode {
                         .outputSourceError(System.out, false);
                 throw new RuntimeException("test method must be exported and public");
             }
+//            this.root = new TruffleWhileyNode.DeclNode.MethodNode((Decl.Method) lambda);
+//            this.root = new CompleteTruffleWhileyNode.DeclNode.MethodNode((Decl.Method) lambda);
 //            else {
 //                // traverse AST and generate Truffle AST.
 //                return lambda;
@@ -88,12 +105,14 @@ public class TruffleWhileyRootNode extends RootNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        System.out.println("execute!");
+//        System.out.println("execute!");
         try {
+//            ConcreteSemantics.RValue returns = interpreter.execute(root, stack, false);
+//            ConcreteSemantics.RValue returns = interpreter.execute(root, stack, true);
             ConcreteSemantics.RValue returns = interpreter.execute(name, sig, stack);
-            System.out.println("########Result########");
-            System.out.println(returns);
-            System.out.println("######################");
+//            System.out.println("########Result########");
+//            System.out.println(returns);
+//            System.out.println("######################");
         } catch (Error error) {
             return false;
         }

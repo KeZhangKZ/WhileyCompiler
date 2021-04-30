@@ -1213,7 +1213,7 @@ public class WyilFile extends AbstractCompilationUnit<WyilFile> {
 				//
 				if (type instanceof WyilFile.Type.Callable) {
 					// Set the type
-					operands[6] = heap.allocate(type);
+					operands[6] = (AbstractSyntacticItem) heap.allocate(type);
 				} else {
 					throw new IllegalArgumentException();
 				}
@@ -1491,7 +1491,7 @@ public class WyilFile extends AbstractCompilationUnit<WyilFile> {
 				SyntacticHeap heap = getHeap();
 				SyntacticItem first = operands[0];
 				this.operands = Arrays.copyOf(operands, items.length + 1);
-				this.operands[0] = first;
+				this.operands[0] = (AbstractSyntacticItem) first;
 				for(int i=1;i!=operands.length;++i) {
 					operands[i] = heap.allocate(new Ref<>(items[i - 1]));
 				}
@@ -2639,7 +2639,7 @@ public class WyilFile extends AbstractCompilationUnit<WyilFile> {
 
 			@Override
 			public void setType(Type type) {
-				operands[0] = type;
+				operands[0] = (AbstractSyntacticItem) type;
 			}
 		}
 
@@ -2885,7 +2885,7 @@ public class WyilFile extends AbstractCompilationUnit<WyilFile> {
 
 			@Override
 			public void setType(Type type) {
-				operands[0] = type;
+				operands[0] = (AbstractSyntacticItem) type;
 			}
 
 			public Expr getSource() {
